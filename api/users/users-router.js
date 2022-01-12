@@ -1,5 +1,6 @@
 const express = require('express');
 const Users = require('./users-model');
+const Posts = require('../posts/posts-model')
 const {
   logger,
   validatePost,
@@ -44,13 +45,20 @@ router.delete('/:id',validateUserId, (req, res,next) => {
   // RETURN THE FRESHLY DELETED USER OBJECT
   // this needs a middleware to verify user id
   Users.remove(req.params.id)
-  .then(removedUser => res.json(req.user))
+  .then(() => res.json(req.user))
   .catch(err => next(err))
 });
 
-router.get('/:id/posts', (req, res) => {
+router.get('/:id/posts',validateUserId, async (req, res,next) => {
   // RETURN THE ARRAY OF USER POSTS
   // this needs a middleware to verify user id
+  try{
+    const posts = await Users.getUserPosts(req.params.id)
+    res.json(posts)
+  }
+  catch{next()}
+ 
+  
 });
 
 router.post('/:id/posts', (req, res) => {
